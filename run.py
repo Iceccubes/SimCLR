@@ -76,15 +76,19 @@ def main():
     with open(args.data, 'rb') as f:
         loaded_dataset = pickle.load(f)
 
-    # Apply transforms for pipline
+    # Assuming you have an existing dataset named 'loaded_dataset'
+    # Apply SimCLR transformations to each sample in the dataset
     for idx in range(len(loaded_dataset)):
-        sample = loaded_dataset[idx]
+        sample_tuple = loaded_dataset[idx]
+        transformed_samples = []
 
-        # Apply SimCLR transformations to the individual image
-        transformed_sample = simclr_transforms(sample)
+        # Apply SimCLR transformations to each individual image in the tuple
+        for sample in sample_tuple:
+            transformed_sample = simclr_transforms(sample)
+            transformed_samples.append(transformed_sample)
 
-        # Update the dataset with the transformed sample
-        loaded_dataset[idx] = transformed_sample
+        # Update the dataset with the transformed samples
+        loaded_dataset[idx] = tuple(transformed_samples)
 
     
     train_loader = torch.utils.data.DataLoader(
