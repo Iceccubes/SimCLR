@@ -6,15 +6,19 @@ from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
 from simclr import SimCLR
 
+# Added for SAS evaluation
+import pickle
+from sas.subset_dataset import SASSubsetDataset, RandomSubsetDataset 
+
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
                      and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch SimCLR')
 parser.add_argument('-data', metavar='DIR', default='./datasets',
-                    help='path to dataset')
-parser.add_argument('-dataset-name', default='stl10',
-                    help='dataset name', choices=['stl10', 'cifar10'])
+                    help='dataset pickle file')
+parser.add_argument('-datasetname', default='sas',
+                    help='dataset name', choices=['sas', 'random'])
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: ' +
@@ -64,9 +68,10 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
-    dataset = ContrastiveLearningDataset(args.data)
-
-    train_dataset = dataset.get_dataset(args.dataset_name, args.n_views)
+    with open(args.data, 'rb') as f:
+        loaded_dataset = pickle.load(f)
+    dataset_base = ContrastiveLearningDataset(loaded_dataset)
+    train_dataset = dataset_base.get_dataset(args.datasetname, args.n_views)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,

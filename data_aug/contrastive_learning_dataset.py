@@ -1,13 +1,15 @@
 from torchvision.transforms import transforms
 from data_aug.gaussian_blur import GaussianBlur
-from torchvision import transforms, datasets
+from torchvision import transforms
 from data_aug.view_generator import ContrastiveLearningViewGenerator
 from exceptions.exceptions import InvalidDatasetSelection
+# Added for SAS evaluation
+from sas.subset_dataset import SASSubsetDataset, RandomSubsetDataset 
 
 
 class ContrastiveLearningDataset:
-    def __init__(self, root_folder):
-        self.root_folder = root_folder
+    def __init__(self, dataset):
+        self.dataset = dataset
 
     @staticmethod
     def get_simclr_pipeline_transform(size, s=1):
@@ -21,21 +23,24 @@ class ContrastiveLearningDataset:
                                               transforms.ToTensor()])
         return data_transforms
 
-    def get_dataset(self, name, n_views):
-        valid_datasets = {'cifar10': lambda: datasets.CIFAR10(self.root_folder, train=True,
-                                                              transform=ContrastiveLearningViewGenerator(
-                                                                  self.get_simclr_pipeline_transform(32),
-                                                                  n_views),
-                                                              download=True),
+    def get_dataset(self, dataset_name, n_views):
+        valid_datasets = {
+            'sas': lambda: SASSubsetDataset(self.dataset, train=True,
+                                            transform=ContrastiveLearningViewGenerator(
+                                                self.get_simclr_pipeline_transform(32),
+                                                n_views),
+                                            ),
 
-                          'stl10': lambda: datasets.STL10(self.root_folder, split='unlabeled',
-                                                          transform=ContrastiveLearningViewGenerator(
-                                                              self.get_simclr_pipeline_transform(96),
-                                                              n_views),
-                                                          download=True)}
+            'random': lambda: RandomSubsetDataset(self.dataset, train=True,
+                                                transform=ContrastiveLearningViewGenerator(
+                                                    self.get_simclr_pipeline_transform(96),
+                                                    n_views),
+                                                )
+    }
+
 
         try:
-            dataset_fn = valid_datasets[name]
+            dataset_fn = valid_datasets[dataset_name]
         except KeyError:
             raise InvalidDatasetSelection()
         else:
