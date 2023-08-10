@@ -77,10 +77,18 @@ def main():
         loaded_dataset = pickle.load(f)
 
     # Apply transforms for pipline
-    train_dataset = [simclr_transforms(sample) for sample in loaded_dataset]
+    for idx in range(len(loaded_dataset)):
+        sample = loaded_dataset[idx]
+
+        # Apply SimCLR transformations to the individual image
+        transformed_sample = simclr_transforms(sample)
+
+        # Update the dataset with the transformed sample
+        loaded_dataset[idx] = transformed_sample
+
     
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
+        loaded_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
 
     model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
