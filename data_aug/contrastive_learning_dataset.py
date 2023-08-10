@@ -29,13 +29,13 @@ class ContrastiveLearningDataset:
 
     def get_dataset(self, dataset_name, n_views):
         valid_datasets = {
-            'sas': lambda: SASSubsetDataset(self.dataset, train=True,
+            'sas': lambda: SASSubsetDataset(self.dataset,
                                             transform=ContrastiveLearningViewGenerator(
                                                 self.get_simclr_pipeline_transform(32),
                                                 n_views),
                                             ),
 
-            'random': lambda: RandomSubsetDataset(self.dataset, train=True,
+            'random': lambda: RandomSubsetDataset(self.dataset,
                                                 transform=ContrastiveLearningViewGenerator(
                                                     self.get_simclr_pipeline_transform(96),
                                                     n_views),
