@@ -69,11 +69,16 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
+    # 32 sizing as we are using CIFAR100
+    simclr_transforms = ContrastiveLearningDataset.get_simclr_pipeline_transform(32)
+    
+    # Pull data 
     with open(args.data, 'rb') as f:
         loaded_dataset = pickle.load(f)
-    dataset_base = ContrastiveLearningDataset(loaded_dataset)
-    train_dataset = dataset_base.get_dataset(args.datasetname, args.n_views)
 
+    # Apply transforms for pipline
+    train_dataset = [simclr_transforms(sample) for sample in loaded_dataset]
+    
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
