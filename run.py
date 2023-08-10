@@ -79,7 +79,7 @@ def main():
     # Assuming you have an existing dataset named 'loaded_dataset'
     # Apply SimCLR transformations to each sample in the dataset
     for idx in range(len(loaded_dataset)):
-        sample_tuple = loaded_dataset.get_original_item(idx)
+        sample_tuple = loaded_dataset[idx]
         transformed_samples = []
 
         # Apply SimCLR transformations to each individual image in the tuple
