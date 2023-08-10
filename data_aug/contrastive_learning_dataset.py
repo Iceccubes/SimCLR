@@ -1,9 +1,10 @@
 from torchvision.transforms import transforms
 from data_aug.gaussian_blur import GaussianBlur
-from torchvision import transforms
+from torchvision import datasets, transforms
 from data_aug.view_generator import ContrastiveLearningViewGenerator
 from exceptions.exceptions import InvalidDatasetSelection
 # Added for SAS evaluation
+from PIL import Image
 from sas.subset_dataset import SASSubsetDataset, RandomSubsetDataset 
 
 
@@ -45,3 +46,28 @@ class ContrastiveLearningDataset:
             raise InvalidDatasetSelection()
         else:
             return dataset_fn()
+
+class CIFAR100Augment(datasets.CIFAR100):
+    def __init__(self, root: str, transform: callable, n_augmentations: int = 2, train: bool = True, download: bool = False):
+        super().__init__(
+            root=root,
+            train=train,
+            transform=transform,
+            download=download
+        )
+        self.n_augmentations = n_augmentations
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img, _ = self.data[index], self.targets[index]
+        pil_img = Image.fromarray(img)
+        imgs = []
+        for _ in range(self.n_augmentations):
+            imgs.append(self.transform(pil_img))
+        return imgs
