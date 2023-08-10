@@ -6,6 +6,9 @@ from exceptions.exceptions import InvalidDatasetSelection
 # Added for SAS evaluation
 from PIL import Image
 from sas.subset_dataset import SASSubsetDataset, RandomSubsetDataset 
+from torchvision.models import resnet18, resnet50
+import torch.nn as nn
+import torch
 
 
 class ContrastiveLearningDataset:
@@ -71,3 +74,17 @@ class CIFAR100Augment(datasets.CIFAR100):
         for _ in range(self.n_augmentations):
             imgs.append(self.transform(pil_img))
         return imgs
+
+class PretrainedResnet(nn.Module):
+    def __init__(self):
+        super(PretrainedResnet, self).__init__()
+        self.base_model = resnet50(pretrained=True)
+        self.base_model = nn.Sequential(*list(self.base_model.children())[:-1])  # Remove the last classification layer
+        
+    def forward(self, x1, ):
+        with torch.no_grad():
+            embedding_1 = self.base_model(x1)
+        
+        embedding_1_flat = torch.flatten(embedding_1, start_dim=1)
+ 
+        return embedding_1_flat

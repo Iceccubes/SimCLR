@@ -2,8 +2,8 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 from torchvision import models
-# CIFAR100Augment is needed for pickle import
-from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset, CIFAR100Augment
+# CIFAR100Augment and PretrainedResnet is needed for pickle import
+from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset, CIFAR100Augment, PretrainedResnet
 from models.resnet_simclr import ResNetSimCLR
 from simclr import SimCLR
 
