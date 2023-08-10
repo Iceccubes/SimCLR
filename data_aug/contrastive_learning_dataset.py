@@ -1,5 +1,6 @@
 from torchvision.transforms import transforms
 from data_aug.gaussian_blur import GaussianBlur
+from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 from data_aug.view_generator import ContrastiveLearningViewGenerator
 from exceptions.exceptions import InvalidDatasetSelection
@@ -88,3 +89,17 @@ class PretrainedResnet(nn.Module):
         embedding_1_flat = torch.flatten(embedding_1, start_dim=1)
  
         return embedding_1_flat
+    
+class ContrastiveWarpper(Dataset):
+    def __init__(self, subset, transform=None):
+        self.subset = subset
+        self.transform = transform
+        
+    def __getitem__(self, index):
+        x, y = self.subset[index]
+        if self.transform:
+            x = self.transform(x)
+        return x, y
+        
+    def __len__(self):
+        return len(self.subset)

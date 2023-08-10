@@ -3,7 +3,7 @@ import torch
 import torch.backends.cudnn as cudnn
 from torchvision import models
 # CIFAR100Augment and PretrainedResnet is needed for pickle import
-from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset, CIFAR100Augment, PretrainedResnet
+from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset, CIFAR100Augment, PretrainedResnet, ContrastiveWarpper
 from models.resnet_simclr import ResNetSimCLR
 from simclr import SimCLR
 
@@ -76,23 +76,9 @@ def main():
     with open(args.data, 'rb') as f:
         loaded_dataset = pickle.load(f)
 
-    # Assuming you have an existing dataset named 'loaded_dataset'
-    # Apply SimCLR transformations to each sample in the dataset
-    for idx in range(len(loaded_dataset)):
-        sample_tuple = loaded_dataset[idx]
-        transformed_samples = []
-
-        # Apply SimCLR transformations to each individual image in the tuple
-        for sample in sample_tuple:
-            transformed_sample = simclr_transforms(sample)
-            transformed_samples.append(transformed_sample)
-
-        # Update the dataset with the transformed samples
-        loaded_dataset[idx] = tuple(transformed_samples)
-
-    
+    dataset = ContrastiveWarpper(loaded_dataset, simclr_transforms)
     train_loader = torch.utils.data.DataLoader(
-        loaded_dataset, batch_size=args.batch_size, shuffle=True,
+        dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
 
     model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
